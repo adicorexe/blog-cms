@@ -1,0 +1,11 @@
+const express = require('express');
+const protect = require('../middleware/auth');
+const { listPosts, getPost, createPost, updatePost, deletePost, listMyPosts } = require('../controllers/postController');
+const router = express.Router();
+router.get('/', listPosts);
+router.get('/mine', protect, listMyPosts);
+router.get('/:id', getPost);
+router.post('/', protect, createPost);
+router.put('/:id', protect, updatePost);
+router.delete('/:id', protect, deletePost);
+module.exports = router;
