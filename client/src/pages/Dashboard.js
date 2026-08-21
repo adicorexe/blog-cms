@@ -7,17 +7,18 @@ export default function Dashboard() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const load = () =>
-    apiRequest("/posts/mine")
+  const load = useCallback(() => {
+    return apiRequest("/posts/mine")
       .then(setPosts)
       .catch((err) => {
         setError(err.message);
         if (err.status === 401) navigate("/login");
       });
+  }, [navigate]);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   const remove = async (id) => {
     if (!window.confirm("Delete this post?")) return;
