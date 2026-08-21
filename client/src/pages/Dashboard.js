@@ -1,2 +1,92 @@
-import {useEffect,useState} from "react"; import {Link,useNavigate} from "react-router-dom"; import {apiRequest} from "../services/api";
-export default function Dashboard(){const[posts,setPosts]=useState([]);const[error,setError]=useState("");const navigate=useNavigate();const load=()=>apiRequest("/posts/mine").then(setPosts).catch(err=>{setError(err.message);if(err.status===401)navigate("/login")});useEffect(()=>{load()},[]);const remove=async id=>{if(!window.confirm("Delete this post?"))return;try{await apiRequest(`/posts/${id}`,{method:"DELETE"});load()}catch(err){setError(err.message)}};return <section><div className="dashboard-head"><div><span className="eyebrow">WORKSPACE</span><h1>Your dashboard</h1><p>Manage drafts and published stories from one place.</p></div><Link className="primary-btn" to="/editor">+ New post</Link></div>{error&&<div className="error-box">{error}</div>}<div className="table-card"><div className="table-head"><span>Title</span><span>Status</span><span>Updated</span><span>Actions</span></div>{posts.length?posts.map(post=><div className="table-row" key={post._id}><strong>{post.title}</strong><span className={`status ${post.publishStatus}`}>{post.publishStatus}</span><span>{new Date(post.updatedDate).toLocaleDateString()}</span><span className="actions"><Link to={`/editor/${post._id}`}>Edit</Link><button onClick={()=>remove(post._id)}>Delete</button></span></div>):<div className="empty-state"><h3>Your workspace is empty</h3><p>Create a draft to get started.</p></div>}</div></section>}
+import { useCallback, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { apiRequest } from "../services/api";
+
+export default function Dashboard() {
+  const [posts, setPosts] = useState([]);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const load = useCallback(() => {
+    apiRequest("/posts/mine")
+      .then(setPosts)
+      .catch((err) => {
+        setError(err.message);
+        if (err.status === 401) {
+          navigate("/login");
+        }
+      });
+  }, [navigate]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const remove = async (id) => {
+    if (!window.confirm("Delete this post?")) return;
+
+    try {
+      await apiRequest(`/posts/${id}`, {
+        method: "DELETE",
+      });
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <section>
+      <div className="dashboard-head">
+        <div>
+          <span className="eyebrow">WORKSPACE</span>
+          <h1>Your dashboard</h1>
+          <p>Manage drafts and published stories from one place.</p>
+        </div>
+
+        <Link className="primary-btn" to="/editor">
+          + New post
+        </Link>
+      </div>
+
+      {error && <div className="error-box">{error}</div>}
+
+      <div className="table-card">
+        <div className="table-head">
+          <span>Title</span>
+          <span>Status</span>
+          <span>Updated</span>
+          <span>Actions</span>
+        </div>
+
+        {posts.length ? (
+          posts.map((post) => (
+            <div className="table-row" key={post._id}>
+              <strong>{post.title}</strong>
+
+              <span className={`status ${post.publishStatus}`}>
+                {post.publishStatus}
+              </span>
+
+              <span>
+                {new Date(post.updatedDate).toLocaleDateString()}
+              </span>
+
+              <span className="actions">
+                <Link to={`/editor/${post._id}`}>Edit</Link>
+                <button onClick={() => remove(post._id)}>
+                  Delete
+                </button>
+              </span>
+            </div>
+          ))
+        ) : (
+          <div className="empty-state">
+            <h3>Your workspace is empty</h3>
+            <p>Create a draft to get started.</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
