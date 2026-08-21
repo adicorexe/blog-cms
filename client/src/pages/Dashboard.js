@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiRequest } from "../services/api";
 
@@ -7,20 +7,17 @@ export default function Dashboard() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const load = useCallback(() => {
+  const load = () =>
     apiRequest("/posts/mine")
       .then(setPosts)
       .catch((err) => {
         setError(err.message);
-        if (err.status === 401) {
-          navigate("/login");
-        }
+        if (err.status === 401) navigate("/login");
       });
-  }, [navigate]);
 
   useEffect(() => {
     load();
-  }, [load]);
+  }, []);
 
   const remove = async (id) => {
     if (!window.confirm("Delete this post?")) return;
@@ -74,6 +71,7 @@ export default function Dashboard() {
 
               <span className="actions">
                 <Link to={`/editor/${post._id}`}>Edit</Link>
+
                 <button onClick={() => remove(post._id)}>
                   Delete
                 </button>
